@@ -63,11 +63,16 @@ class LoginAPI(KnoxLoginView):
 
     def post(self, request,format = None):
         serializer = AuthTokenSerializer(data = request.data)
-        serializer.is_valid(raise_exception = True)
-        user = serializer.validated_data['user']
-        # also creates session based authentication with token based authentication
-        login(request, user)
-        return super(LoginAPI, self).post(request, format = None)
+        if serializer.is_valid():
+            user = serializer.validated_data['user']
+            # also creates session based authentication with token based authentication
+            login(request, user)
+            return super(LoginAPI, self).post(request, format = None)
+        else:
+            return Response({
+                'status':status.HTTP_404_NOT_FOUND,
+                'message': "Provided username does not exist"
+            })
 
 # checked
 class ViewProfile(generics.GenericAPIView):
